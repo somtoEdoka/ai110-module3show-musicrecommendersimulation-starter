@@ -9,36 +9,75 @@ You will implement the functions in recommender.py:
 - recommend_songs
 """
 
+import argparse
+from typing import List, Sequence
+
 try:
-    from .recommender import load_songs, recommend_songs
+    from .recommender import SCORING_STRATEGIES, load_songs, recommend_songs
 except ImportError:
-    from recommender import load_songs, recommend_songs
+    from recommender import SCORING_STRATEGIES, load_songs, recommend_songs
+
+
+def format_ascii_table(headers: Sequence[str], rows: Sequence[Sequence[str]]) -> str:
+    """Render rows as a bordered, column-aligned ASCII table."""
+    widths = [len(header) for header in headers]
+    for row in rows:
+        if len(row) != len(headers):
+            raise ValueError("Each table row must have the same number of cells as headers")
+        for index, cell in enumerate(row):
+            widths[index] = max(widths[index], len(str(cell)))
+
+    border = "+" + "+".join("-" * (width + 2) for width in widths) + "+"
+
+    def format_row(cells: Sequence[str]) -> str:
+        return "| " + " | ".join(
+            str(cell).ljust(width) for cell, width in zip(cells, widths)
+        ) + " |"
+
+    lines = [border, format_row(headers), border]
+    lines.extend(format_row(row) for row in rows)
+    lines.append(border)
+    return "\n".join(lines)
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description="Compare music recommendations across scoring modes.")
+    parser.add_argument(
+        "--mode",
+        action="append",
+        choices=SCORING_STRATEGIES,
+        help="Scoring mode to run (repeat to compare modes; defaults to balanced, genre_first, and energy_focused).",
+    )
+    args = parser.parse_args()
+
     songs = load_songs("data/songs.csv")
     print(f"Loaded {len(songs)} songs.")
 
-    profiles = [
-        ("High-Energy Pop", {"genre": "pop", "mood": "happy", "energy": 0.85}),
-        ("Chill Lofi", {"genre": "lofi", "mood": "chill", "energy": 0.40}),
-        ("Deep Intense Rock", {"genre": "rock", "mood": "intense", "energy": 0.90}),
-        (
-            "Conflicting: Unseen Genre, Sad Mood, High Energy",
-            {"genre": "shoegaze", "mood": "sad", "energy": 0.90},
-        ),
-    ]
+    user_prefs = {
+        "genre": "metal",
+        "mood": "happy",
+        "energy": 0.85,
+        "popularity": 80,
+        "release_decade": 2020,
+        "detailed_mood_tags": ["happy", "uplifting", "energetic"],
+    }
+    modes = args.mode or ["balanced", "genre_first", "energy_focused"]
+    print("\nProfile: Metal preference, happy mood, high energy")
 
-    for profile_name, user_prefs in profiles:
-        recommendations = recommend_songs(user_prefs, songs, k=5)
-
-        print(f"\n{profile_name} — Top recommendations:\n")
-        for rank, (song, score, reasons) in enumerate(recommendations, start=1):
-            artist = f" - {song['artist']}" if song.get("artist") else ""
-            print(f"{rank}. {song['title']}{artist}")
-            print(f"   Score: {score:.2f}")
-            print(f"   Reasons: {'; '.join(reasons) if reasons else 'No strong preference matches'}")
-            print()
+    for mode in modes:
+        recommendations = recommend_songs(user_prefs, songs, k=8, mode=mode)
+        rows: List[List[str]] = [
+            [
+                str(rank),
+                song["title"],
+                song.get("artist", ""),
+                f"{score:.2f}",
+                "; ".join(reasons) if reasons else "No strong preference matches",
+            ]
+            for rank, (song, score, reasons) in enumerate(recommendations, start=1)
+        ]
+        print(f"\n{mode.replace('_', ' ').title()} - Top recommendations:")
+        print(format_ascii_table(["Rank", "Title", "Artist", "Score", "Reasons"], rows))
 
 
 if __name__ == "__main__":

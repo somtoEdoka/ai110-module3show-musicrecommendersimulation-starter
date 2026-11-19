@@ -19,13 +19,14 @@ Replace this paragraph with your own summary of what your version does.
 
 Real-world recommendation systems often combine collaborative filtering, which finds patterns in what similar users listen to or enjoy together, with content-based filtering, which matches a user's preferences to song attributes. They can learn from explicit signals such as likes and saves, and implicit signals such as plays, skips, replays, and playlist additions, alongside audio or catalog features. This simulation will focus on content-based recommendations: it compares each song's genre, mood, and audio characteristics with a user's stated taste profile, rather than learning behavior patterns across many users.
 
-- **`Song` fields** (from `data/songs.csv`): `id`, `title`, `artist`, `genre`, `mood`, `energy`, `tempo_bpm`, `valence`, `danceability`, and `acousticness`. The first three identify a song; the remaining fields describe its musical style and vibe.
-- **Example `UserProfile`** (planned preferences): `{"favorite_genre": "rock", "favorite_mood": "intense", "target_energy": 0.90, "target_tempo_bpm": 150, "target_valence": 0.48, "target_danceability": 0.66, "target_acousticness": 0.10}`. The current dataclass has fewer fields; it will need to be aligned with these targets when the scoring implementation is added.
-- **Algorithm Recipe (100 points per song)**:
+- **`Song` fields** (from `data/songs.csv`): `id`, `title`, `artist`, `genre`, `mood`, `energy`, `tempo_bpm`, `valence`, `danceability`, `acousticness`, `popularity`, `release_decade`, `detailed_mood_tags`, `key`, and `time_signature`. The added metadata expands matching beyond the original genre, mood, and audio attributes.
+- **Example user preferences**: `{"genre": "rock", "mood": "intense", "energy": 0.90, "target_tempo_bpm": 150, "popularity": 80, "release_decade": 2020, "detailed_mood_tags": ["defiant", "intense"]}`. Every preference is optional; unspecified features do not affect a score.
+- **Balanced scoring recipe (100 points for the original features)**:
   - Genre match: **30 points**; mood match: **25 points**. An exact match earns full points; otherwise it earns zero.
   - Numerical proximity: energy **15**, tempo **10**, valence **8**, danceability **7**, and acousticness **5** points maximum per feature.
   - For each numerical feature `f`, calculate `P_f = max(0, 1 - abs(song_f - target_f) / (max_f - min_f))`, where `min_f` and `max_f` are that feature's catalog bounds. Add `weight_f * P_f` points. This rewards closeness to the target, not simply higher or lower values.
-- **Ranking Rule**: calculate each song's score, sort scores from highest to lowest, and return the top `k` songs.
+- **Scoring modes**: `balanced`, `genre_first`, `mood_first`, and `energy_focused` use different strategy weights. Additional metadata preferences (popularity, decade, mood tags, key, and time signature) contribute only when supplied in the profile.
+- **Ranking Rule**: greedily select the highest effective score for each rank. Once an artist is selected, subsequent songs by that artist receive a 0.5-point diversity penalty.
 
 ```mermaid
 flowchart LR
@@ -60,6 +61,12 @@ pip install -r requirements.txt
 python -m src.main
 ```
 
+The default run compares the same profile with `balanced`, `genre_first`, and `energy_focused`. Select one or more modes with repeated options, for example:
+
+```bash
+python -m src.main --mode mood_first --mode energy_focused
+```
+
 ### Running Tests
 
 Run the starter tests with:
@@ -74,30 +81,26 @@ You can add more tests in `tests/test_recommender.py`.
 
 ## Sample Recommendation Output
 
+Excerpt from the default run showing the energy-focused table and repeat-artist explanation:
+
 ```text
 Loaded 18 songs.
 
-Top recommendations:
+Profile: Metal preference, happy mood, high energy
 
-1. Sunrise City - Neon Echo
-   Score: 69.59
-   Reasons: genre match (+30.0); mood match (+25.0); energy proximity (+14.59)
-
-2. Gym Hero - Max Pulse
-   Score: 42.36
-   Reasons: genre match (+30.0); energy proximity (+12.36)
-
-3. Rooftop Lights - Indigo Parade
-   Score: 39.19
-   Reasons: mood match (+25.0); energy proximity (+14.19)
-
-4. Night Drive Loop - Neon Echo
-   Score: 13.99
-   Reasons: energy proximity (+13.99)
-
-5. Neon Pulse - Vector Bloom
-   Score: 13.58
-   Reasons: energy proximity (+13.58)
+Energy Focused - Top recommendations:
++------+------------------+----------------+-------+-------------------------------------------------------------------------------------------------------------------------------------------------+
+| Rank | Title            | Artist         | Score | Reasons                                                                                                                                         |
++------+------------------+----------------+-------+-------------------------------------------------------------------------------------------------------------------------------------------------+
+| 1    | Sunrise City     | Neon Echo      | 59.02 | mood match (+10.0); energy proximity (+43.18); popularity proximity (+1.84); release_decade proximity (+2.00); detailed mood tags match (+2.00) |
+| 2    | Iron Horizon     | Black Meridian | 56.29 | genre match (+15.0); energy proximity (+38.31); popularity proximity (+1.98); release_decade proximity (+1.00)                                  |
+| 3    | Rooftop Lights   | Indigo Parade  | 53.74 | mood match (+10.0); energy proximity (+39.53); popularity proximity (+1.88); release_decade proximity (+1.00); detailed mood tags match (+1.33) |
+| 4    | Neon Pulse       | Vector Bloom   | 48.86 | energy proximity (+43.78); popularity proximity (+1.74); release_decade proximity (+2.00); detailed mood tags match (+1.33)                     |
+| 5    | Paper Crown      | Static Youth   | 46.23 | energy proximity (+42.57); popularity proximity (+2.00); release_decade proximity (+1.00); detailed mood tags match (+0.67)                     |
+| 6    | Gym Hero         | Max Pulse      | 44.58 | energy proximity (+40.14); popularity proximity (+1.78); release_decade proximity (+2.00); detailed mood tags match (+0.67)                     |
+| 7    | Storm Runner     | Voltline       | 44.33 | energy proximity (+41.35); popularity proximity (+1.98); release_decade proximity (+1.00)                                                       |
+| 8    | Night Drive Loop | Neon Echo      | 42.36 | energy proximity (+38.92); popularity proximity (+1.94); release_decade proximity (+2.00); diversity penalty (-0.50: repeat artist)             |
++------+------------------+----------------+-------+-------------------------------------------------------------------------------------------------------------------------------------------------+
 ```
 
 **Screenshot or video** *(optional)*: <!-- Insert a screenshot or demo video link here -->

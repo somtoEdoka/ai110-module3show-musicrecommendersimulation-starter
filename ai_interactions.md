@@ -10,19 +10,21 @@
 
 **What task did you give the agent?**
 
-<!-- Describe the goal you asked the agent to accomplish -->
+Implement the music-recommender stretch challenges: enrich the song catalog and explainable scoring, add switchable scoring modes, diversify recommendations, and present the results clearly.
 
 **Prompts used:**
 
-<!-- Paste the key prompts you gave the agent -->
+- **Challenge 1:** “Add five new song attributes to the CSV, parse their types, and incorporate optional preferences in explainable scoring.”
+- **Challenge 2:** “Use a Strategy pattern for balanced, genre-first, mood-first, and energy-focused scoring modes, then compare modes on one profile.”
+- **Challenges 3–4:** “Apply a greedy repeat-artist penalty to recommendations and render the results as an aligned ASCII table.”
 
 **What did the agent generate or change?**
 
-<!-- List the files edited, code generated, or commands run -->
+Added popularity, release decade, detailed mood tags, musical key, and time signature to the catalog; added metadata scoring and four dictionary-backed strategies; added an iterative artist-diversity penalty and a standard-library ASCII table. The CLI compares scoring modes using one profile. Focused tests cover parsing, ranking changes, explanations, diversity, and table alignment.
 
 **What did you verify or fix manually?**
 
-<!-- Describe anything the agent got wrong or that required human review -->
+Manually checked the CSV headers and row shapes, reviewed the displayed rankings and explanation strings, and ran the CLI and pytest suite. The catalog check reported 15 headers, 18 song rows, and zero malformed rows.
 
 ---
 
@@ -32,12 +34,26 @@
 
 **Which design pattern did you use?**
 
-<!-- e.g., Strategy, Factory, Observer, etc. -->
+Strategy, implemented as a dictionary mapping each mode name to its scoring weights.
 
 **How did AI help you brainstorm or implement it?**
 
-<!-- Describe the conversation or suggestions that led to your decision -->
+AI compared a mode-to-weights strategy table with scattered mode-specific conditionals. The table keeps each strategy's weights together, allows the existing scoring loop to be reused, and makes adding a mode a local change. The optional `mode="balanced"` argument preserves the default behavior for existing calls.
 
 **How does the pattern appear in your final code?**
 
-<!-- Point to the relevant class or method -->
+`SCORING_STRATEGIES` in `src/recommender.py` contains the `balanced`, `genre_first`, `mood_first`, and `energy_focused` strategies. `score_song()` reads the selected weights, and `recommend_songs()` passes through the mode.
+
+## Challenge 1: Advanced Song Features
+
+The five new CSV columns are `popularity` (integer), `release_decade` (integer), `detailed_mood_tags` (pipe-separated in the file and parsed as a list), `key` (text), and `time_signature` (integer). Optional profile preferences score popularity and decade by proximity, tags by overlap, and key/time signature by exact match; each contributing feature adds an explanation reason. Danceability and acousticness were already in the catalog and remain supported.
+
+Manual verification confirmed 15 unique headers, 18 rows, and no missing or extra CSV cells. The loader produced integer values for the numeric metadata and a list of strings for mood tags.
+
+## Challenge 3: Diversity Penalty
+
+`recommend_songs()` greedily selects the best remaining candidate at each rank. Once an artist has been selected, later songs by that artist receive the configurable default `0.5` score reduction and a `diversity penalty (-0.50: repeat artist)` explanation. The returned score reflects the adjusted score.
+
+## Challenge 4: Visual Summary Table
+
+The CLI formats each mode's results as an aligned ASCII table with Rank, Title, Artist, Score, and Reasons columns. Column widths are calculated from the output, using Python's standard library without requiring `tabulate`.

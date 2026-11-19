@@ -1,19 +1,19 @@
-id,title,artist,genre,mood,energy,tempo_bpm,valence,danceability,acousticness
-1,Sunrise City,Neon Echo,pop,happy,0.82,118,0.84,0.79,0.18
-2,Midnight Coding,LoRoom,lofi,chill,0.42,78,0.56,0.62,0.71
-3,Storm Runner,Voltline,rock,intense,0.91,152,0.48,0.66,0.10
-4,Library Rain,Paper Lanterns,lofi,chill,0.35,72,0.60,0.58,0.86
-5,Gym Hero,Max Pulse,pop,intense,0.93,132,0.77,0.88,0.05
-6,Spacewalk Thoughts,Orbit Bloom,ambient,chill,0.28,60,0.65,0.41,0.92
-7,Coffee Shop Stories,Slow Stereo,jazz,relaxed,0.37,90,0.71,0.54,0.89
-8,Night Drive Loop,Neon Echo,synthwave,moody,0.75,110,0.49,0.73,0.22
-9,Focus Flow,LoRoom,lofi,focused,0.40,80,0.59,0.60,0.78
-10,Rooftop Lights,Indigo Parade,indie pop,happy,0.76,124,0.81,0.82,0.35
-11,Moonlit Sonata,Silver Orchard,classical,serene,0.22,68,0.52,0.25,0.95
-12,Dusty Trail,Maple County,folk,nostalgic,0.48,96,0.63,0.47,0.82
-13,Iron Horizon,Black Meridian,metal,defiant,0.96,168,0.42,0.56,0.04
-14,Island Rhythm,Coral Avenue,reggae,carefree,0.66,104,0.88,0.85,0.19
-15,Blue Note Alley,Low Lantern,blues,melancholic,0.44,76,0.31,0.39,0.73
-16,Open Road,June Wilder,country,hopeful,0.71,112,0.79,0.68,0.32
-17,Neon Pulse,Vector Bloom,house,euphoric,0.87,128,0.90,0.91,0.07
-18,Paper Crown,Static Youth,punk,rebellious,0.89,154,0.58,0.72,0.12
+id,title,artist,genre,mood,energy,tempo_bpm,valence,danceability,acousticness,popularity,release_decade,detailed_mood_tags,key,time_signature
+1,Sunrise City,Neon Echo,pop,happy,0.82,118,0.84,0.79,0.18,88,2020,happy|uplifting|energetic,C,4
+2,Midnight Coding,LoRoom,lofi,chill,0.42,78,0.56,0.62,0.71,72,2020,chill|focused|introspective,F,4
+3,Storm Runner,Voltline,rock,intense,0.91,152,0.48,0.66,0.10,81,2010,intense|defiant|driving,E,4
+4,Library Rain,Paper Lanterns,lofi,chill,0.35,72,0.60,0.58,0.86,64,2010,chill|peaceful|reflective,G,4
+5,Gym Hero,Max Pulse,pop,intense,0.93,132,0.77,0.88,0.05,91,2020,intense|confident|energetic,D,4
+6,Spacewalk Thoughts,Orbit Bloom,ambient,chill,0.28,60,0.65,0.41,0.92,58,2020,chill|dreamy|peaceful,A,4
+7,Coffee Shop Stories,Slow Stereo,jazz,relaxed,0.37,90,0.71,0.54,0.89,69,2010,relaxed|warm|nostalgic,Bb,4
+8,Night Drive Loop,Neon Echo,synthwave,moody,0.75,110,0.49,0.73,0.22,83,2020,moody|nostalgic|dreamy,F#,4
+9,Focus Flow,LoRoom,lofi,focused,0.40,80,0.59,0.60,0.78,76,2020,focused|calm|introspective,D,4
+10,Rooftop Lights,Indigo Parade,indie pop,happy,0.76,124,0.81,0.82,0.35,86,2010,happy|hopeful|uplifting,G,4
+11,Moonlit Sonata,Silver Orchard,classical,serene,0.22,68,0.52,0.25,0.95,62,2000,serene|reflective|peaceful,C,3
+12,Dusty Trail,Maple County,folk,nostalgic,0.48,96,0.63,0.47,0.82,74,2010,nostalgic|warm|hopeful,D,3
+13,Iron Horizon,Black Meridian,metal,defiant,0.96,168,0.42,0.56,0.04,79,2010,defiant|intense|aggressive,E,4
+14,Island Rhythm,Coral Avenue,reggae,carefree,0.66,104,0.88,0.85,0.19,84,2020,carefree|uplifting|warm,C,4
+15,Blue Note Alley,Low Lantern,blues,melancholic,0.44,76,0.31,0.39,0.73,67,2000,melancholic|reflective|introspective,F,4
+16,Open Road,June Wilder,country,hopeful,0.71,112,0.79,0.68,0.32,77,2020,hopeful|nostalgic|uplifting,A,4
+17,Neon Pulse,Vector Bloom,house,euphoric,0.87,128,0.90,0.91,0.07,93,2020,euphoric|energetic|uplifting,F#,4
+18,Paper Crown,Static Youth,punk,rebellious,0.89,154,0.58,0.72,0.12,80,2010,rebellious|defiant|energetic,A,4
