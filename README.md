@@ -20,9 +20,20 @@ Replace this paragraph with your own summary of what your version does.
 Real-world recommendation systems often combine collaborative filtering, which finds patterns in what similar users listen to or enjoy together, with content-based filtering, which matches a user's preferences to song attributes. They can learn from explicit signals such as likes and saves, and implicit signals such as plays, skips, replays, and playlist additions, alongside audio or catalog features. This simulation will focus on content-based recommendations: it compares each song's genre, mood, and audio characteristics with a user's stated taste profile, rather than learning behavior patterns across many users.
 
 - **`Song` fields** (from `data/songs.csv`): `id`, `title`, `artist`, `genre`, `mood`, `energy`, `tempo_bpm`, `valence`, `danceability`, and `acousticness`. The first three identify a song; the remaining fields describe its musical style and vibe.
-- **`UserProfile` preferences**: `favorite_genre` (matched to `genre`), `favorite_mood` (matched to `mood`), and target values for `energy`, `tempo_bpm`, `valence`, `danceability`, and `acousticness`.
-- **Scoring Rule**: score one song on a 0–1 scale using weighted feature matches: genre 30%, mood 25%, energy 15%, tempo 10%, valence 8%, danceability 7%, and acousticness 5%. Genre and mood receive full credit for a match; numerical features earn more credit as they get closer to the user's target, using normalized distance rather than rewarding simply higher or lower values.
-- **Ranking Rule**: score every eligible song, sort by score from highest to lowest, and return the top `k` songs as recommendations.
+- **Example `UserProfile`** (planned preferences): `{"favorite_genre": "rock", "favorite_mood": "intense", "target_energy": 0.90, "target_tempo_bpm": 150, "target_valence": 0.48, "target_danceability": 0.66, "target_acousticness": 0.10}`. The current dataclass has fewer fields; it will need to be aligned with these targets when the scoring implementation is added.
+- **Algorithm Recipe (100 points per song)**:
+  - Genre match: **30 points**; mood match: **25 points**. An exact match earns full points; otherwise it earns zero.
+  - Numerical proximity: energy **15**, tempo **10**, valence **8**, danceability **7**, and acousticness **5** points maximum per feature.
+  - For each numerical feature `f`, calculate `P_f = max(0, 1 - abs(song_f - target_f) / (max_f - min_f))`, where `min_f` and `max_f` are that feature's catalog bounds. Add `weight_f * P_f` points. This rewards closeness to the target, not simply higher or lower values.
+- **Ranking Rule**: calculate each song's score, sort scores from highest to lowest, and return the top `k` songs.
+
+```mermaid
+flowchart LR
+    A["Input: User Profile + songs.csv"] --> B["Process: Score each song"]
+    B --> C["Output: Sort and return Top K recommendations"]
+```
+
+**Potential biases:** The 30-point genre weight may over-prioritize genre and narrow discovery into a filter bubble. The catalog is small and curated, so its selection may skew which genres and moods can be recommended. Exact genre and mood matching can also miss appealing cross-genre songs.
 
 ---
 
