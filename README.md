@@ -17,17 +17,12 @@ Replace this paragraph with your own summary of what your version does.
 
 ## How The System Works
 
-Explain your design in plain language.
+Real-world recommendation systems often combine collaborative filtering, which finds patterns in what similar users listen to or enjoy together, with content-based filtering, which matches a user's preferences to song attributes. They can learn from explicit signals such as likes and saves, and implicit signals such as plays, skips, replays, and playlist additions, alongside audio or catalog features. This simulation will focus on content-based recommendations: it compares each song's genre, mood, and audio characteristics with a user's stated taste profile, rather than learning behavior patterns across many users.
 
-Some prompts to answer:
-
-- What features does each `Song` use in your system
-  - For example: genre, mood, energy, tempo
-- What information does your `UserProfile` store
-- How does your `Recommender` compute a score for each song
-- How do you choose which songs to recommend
-
-You can include a simple diagram or bullet list if helpful.
+- **`Song` fields** (from `data/songs.csv`): `id`, `title`, `artist`, `genre`, `mood`, `energy`, `tempo_bpm`, `valence`, `danceability`, and `acousticness`. The first three identify a song; the remaining fields describe its musical style and vibe.
+- **`UserProfile` preferences**: `favorite_genre` (matched to `genre`), `favorite_mood` (matched to `mood`), and target values for `energy`, `tempo_bpm`, `valence`, `danceability`, and `acousticness`.
+- **Scoring Rule**: score one song on a 0–1 scale using weighted feature matches: genre 30%, mood 25%, energy 15%, tempo 10%, valence 8%, danceability 7%, and acousticness 5%. Genre and mood receive full credit for a match; numerical features earn more credit as they get closer to the user's target, using normalized distance rather than rewarding simply higher or lower values.
+- **Ranking Rule**: score every eligible song, sort by score from highest to lowest, and return the top `k` songs as recommendations.
 
 ---
 
