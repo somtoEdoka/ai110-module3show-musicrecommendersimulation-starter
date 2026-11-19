@@ -19,19 +19,26 @@ def main() -> None:
     songs = load_songs("data/songs.csv")
     print(f"Loaded {len(songs)} songs.")
 
-    # Starter example profile
-    user_prefs = {"genre": "pop", "mood": "happy", "energy": 0.8}
+    profiles = [
+        ("High-Energy Pop", {"genre": "pop", "mood": "happy", "energy": 0.85}),
+        ("Chill Lofi", {"genre": "lofi", "mood": "chill", "energy": 0.40}),
+        ("Deep Intense Rock", {"genre": "rock", "mood": "intense", "energy": 0.90}),
+        (
+            "Conflicting: Unseen Genre, Sad Mood, High Energy",
+            {"genre": "shoegaze", "mood": "sad", "energy": 0.90},
+        ),
+    ]
 
-    recommendations = recommend_songs(user_prefs, songs, k=5)
+    for profile_name, user_prefs in profiles:
+        recommendations = recommend_songs(user_prefs, songs, k=5)
 
-    print("\nTop recommendations:\n")
-    for rank, rec in enumerate(recommendations, start=1):
-        song, score, reasons = rec
-        artist = f" - {song['artist']}" if song.get("artist") else ""
-        print(f"{rank}. {song['title']}{artist}")
-        print(f"   Score: {score:.2f}")
-        print(f"   Reasons: {'; '.join(reasons) if reasons else 'No strong preference matches'}")
-        print()
+        print(f"\n{profile_name} — Top recommendations:\n")
+        for rank, (song, score, reasons) in enumerate(recommendations, start=1):
+            artist = f" - {song['artist']}" if song.get("artist") else ""
+            print(f"{rank}. {song['title']}{artist}")
+            print(f"   Score: {score:.2f}")
+            print(f"   Reasons: {'; '.join(reasons) if reasons else 'No strong preference matches'}")
+            print()
 
 
 if __name__ == "__main__":
