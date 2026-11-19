@@ -1,73 +1,41 @@
-# 🎧 Model Card: Music Recommender Simulation
+# 🎧 Model Card: VibeFinder 1.0
 
-## 1. Model Name  
+## 1. Model Name
 
-Give your model a short, descriptive name.  
-Example: **VibeFinder 1.0**  
+**VibeFinder 1.0** is a small, explainable music recommender for classroom learning.
 
----
+## 2. Goal / Task
 
-## 2. Intended Use  
+VibeFinder predicts which songs in its catalog best match a user's stated taste. It ranks songs and gives a short explanation for each recommendation.
 
-Describe what your recommender is designed to do and who it is for. 
+## 3. Data Used
 
-Prompts:  
+The dataset contains **18 songs**. Each row has an ID, title, artist, genre, mood, energy, tempo, valence, danceability, and acousticness. It includes styles such as pop, lofi, rock, jazz, classical, and reggae, but many genres and moods appear only once. The catalog has no listening history, user ratings, lyrics, or broad coverage of music.
 
-- What kind of recommendations does it generate  
-- What assumptions does it make about the user  
-- Is this for real users or classroom exploration  
+## 4. Algorithm Summary
 
----
+The recommender compares a user's genre and mood with each song. An exact genre match adds 30 points, and an exact mood match adds 25 points. When a numeric target is supplied, the song earns points for being close to that target, measured against the catalog's range: energy is worth up to 15 points, tempo 10, valence 8, danceability 7, and acousticness 5. All features together can contribute up to 100 points. Songs are sorted by total score, and the top five are returned. The four command-line profiles provide genre, mood, and energy targets.
 
-## 3. How the Model Works  
+## 5. Strengths
 
-Explain your scoring approach in simple language.  
+The rules are simple to understand, and the score reasons make rankings easy to inspect. When a profile uses labels that exist in the catalog, songs that match those labels tend to rise to the top. Energy matching also helps distinguish songs with different intensity.
 
-Prompts:  
-
-- What features of each song are used (genre, energy, mood, etc.)  
-- What user preferences are considered  
-- How does the model turn those into a score  
-- What changes did you make from the starter logic  
-
-Avoid code here. Pretend you are explaining the idea to a friend who does not program.
-
----
-
-## 4. Data  
-
-Describe the dataset the model uses.  
-
-Prompts:  
-
-- How many songs are in the catalog  
-- What genres or moods are represented  
-- Did you add or remove data  
-- Are there parts of musical taste missing in the dataset  
-
----
-
-## 5. Strengths  
-
-Where does your system seem to work well  
-
-Prompts:  
-
-- User types for which it gives reasonable results  
-- Any patterns you think your scoring captures correctly  
-- Cases where the recommendations matched your intuition  
-
----
-
-## 6. Limitations and Bias 
+## 6. Observed Behavior / Biases
 
 The catalog contains only 18 hand-curated songs, with many genres and moods represented by just one song, so recommendations reflect the catalog's gaps rather than the full range of music. An exact genre match is worth 30 points and an exact mood match is worth 25, which can outweigh close audio-feature matches and may keep users in a narrow genre or mood. When a profile asks for an unseen genre and mood, as in our adversarial test, neither preference can match; the results are then driven by the one available numeric preference, energy. The top-five list has no artist or style diversity rule, so similar songs can crowd out less obvious discoveries.
 
+In the Deep Intense Rock test, Storm Runner ranked first because it matched both requested labels and was close to the high energy target. In the conflicting profile, all five recommendations were selected on energy proximity alone. This makes the list look decisive even though the system could not satisfy two of the user's three stated preferences.
+
 ---
 
-## 7. Evaluation  
+## 7. Evaluation Process
 
 We ran `python -m src.main` for four profiles: **High-Energy Pop**, **Chill Lofi**, **Deep Intense Rock**, and the adversarial **Conflicting: Unseen Genre, Sad Mood, High Energy** profile. We checked whether songs with matching genre and mood appeared near the top, whether high-energy profiles received energetic songs, and how the conflicting profile behaved when its requested labels were absent from the catalog.
+
+- **High-Energy Pop:** pop, happy, energy 0.85.
+- **Chill Lofi:** lofi, chill, energy 0.40.
+- **Deep Intense Rock:** rock, intense, energy 0.90.
+- **Conflicting edge case:** unseen shoegaze genre, sad mood, energy 0.90.
 
 ### Baseline terminal output
 
@@ -168,7 +136,7 @@ Conflicting: Unseen Genre, Sad Mood, High Energy — Top recommendations:
 
 ### What we observed
 
-The recommendations felt sensible when a profile's genre and mood both exist in the catalog: for example, the Chill Lofi list begins with two songs matching both labels, and the Deep Intense Rock list begins with a song matching both rock and intense. The High-Energy Pop result also fit its preferences. Storm Runner ranked first for Deep Intense Rock because it received the full 30 genre points and 25 mood points, with an additional 14.80 points for being near the energy target. It was notable that the conflicting profile still produced a confident-looking ranked list even though none of its requested genre or mood labels matched; every reason shown was energy proximity.
+The results felt accurate when a profile's genre and mood existed in the catalog. Chill Lofi starts with two songs matching both labels, and Deep Intense Rock starts with a song matching rock and intense. Storm Runner ranked first there because it earned 30 genre points, 25 mood points, and 14.80 points for energy proximity. I was surprised that the conflicting profile still produced a full ranked list even though its genre and mood did not match any song.
 
 ### Pairwise profile comparisons
 
@@ -181,7 +149,7 @@ The recommendations felt sensible when a profile's genre and mood both exist in 
 
 ### Weight Shift sensitivity experiment
 
-We temporarily changed genre weight from 30 to 15 points and energy weight from 15 to 30 points, leaving the other scoring rules unchanged. This shifted songs with closer energy to the front when the genre bonus had been deciding close contests. The experiment output was:
+We temporarily changed genre weight from 30 to 15 points and energy weight from 15 to 30 points. All other weights stayed the same. Songs closer to the energy target gained influence. The experiment output was:
 
 ```text
 Loaded 18 songs.
@@ -278,29 +246,18 @@ Conflicting: Unseen Genre, Sad Mood, High Energy — Top recommendations:
    Reasons: energy proximity (+27.57)
 ```
 
-In the shifted run, Rooftop Lights moved above Gym Hero for High-Energy Pop, and Spacewalk Thoughts moved above Focus Flow for Chill Lofi. The Deep Intense Rock and conflicting profile rankings stayed in the same order, but their scores changed. The baseline weights were restored after the experiment.
+In the shifted run, Rooftop Lights moved above Gym Hero for High-Energy Pop, and Spacewalk Thoughts moved above Focus Flow for Chill Lofi. Deep Intense Rock and the conflicting profile kept the same top-five order, but their scores changed. The baseline weights were restored after the experiment.
 
----
+## 8. Intended Use and Non-Intended Use
 
-## 8. Future Work  
+This simulation is built to teach and demonstrate content-based filtering. It compares stated preferences with song attributes and explains its scores. It is not built for a production streaming service. It should not be used for large-scale personalization without user histories, broader data, and careful evaluation.
 
-Ideas for how you would improve the model next.  
+## 9. Ideas for Improvement
 
-Prompts:  
+- Add a larger, more diverse song catalog so more genres and moods are represented.
+- Normalize tempo and other features with clear, data-driven ranges, then test their effect on rankings.
+- Collect likes, skips, and listening history to add user feedback and collaborative filtering.
 
-- Additional features or preferences  
-- Better ways to explain recommendations  
-- Improving diversity among the top results  
-- Handling more complex user tastes  
+## 10. Personal Reflection
 
----
-
-## 9. Personal Reflection  
-
-A few sentences about your experience.  
-
-Prompts:  
-
-- What you learned about recommender systems  
-- Something unexpected or interesting you discovered  
-- How this changed the way you think about music recommendation apps  
+My biggest learning moment was seeing how changing a few weights changed which songs appeared near the top. AI tools helped me implement and explain the recommender, but I needed to double-check the CSV schema, the scoring math and weights, and the exact CLI output. I was surprised that simple weighted rules could still feel like real recommendations because the matches were recognizable and the reasons were clear. If I extended the project, I would add a larger catalog and use listener feedback, such as likes and skips, to improve recommendations.
